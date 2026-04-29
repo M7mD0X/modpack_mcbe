@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Flutter needs the debug application id to be the same as the release id
+         so it can connect to the running application while debugging. -->
     <application
         android:label="${app_name}"
         android:icon="@mipmap/ic_launcher">
