@@ -15,14 +15,12 @@ class ApplyScreen extends StatefulWidget {
 class _ApplyScreenState extends State<ApplyScreen>
     with AutomaticKeepAliveClientMixin {
   String _applyingModpackId = '';
-  bool _applySuccess = false;
   @override
   bool get wantKeepAlive => true;
 
   Future<void> _applyModpack(String modpackId) async {
     setState(() {
       _applyingModpackId = modpackId;
-      _applySuccess = false;
     });
 
     // Simulate the apply process
@@ -33,7 +31,6 @@ class _ApplyScreenState extends State<ApplyScreen>
     if (mounted) {
       setState(() {
         _applyingModpackId = '';
-        _applySuccess = true;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

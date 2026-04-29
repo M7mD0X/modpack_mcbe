@@ -138,22 +138,3 @@ class _AnimatedSplashState extends State<AnimatedSplash>
     );
   }
 }
-
-/// AnimatedBuilder is available from package:flutter/widgets.dart.
-/// We re-export it here for backward compatibility with the splash widget.
-typedef AnimatedBuilder = _AnimatedBuilderImpl;
-
-class _AnimatedBuilderImpl extends AnimatedWidget {
-  final Widget Function(BuildContext context, Widget? child) builder;
-
-  const _AnimatedBuilderImpl({
-    super.key,
-    required super.listenable,
-    required this.builder,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return builder(context, null);
-  }
-}
