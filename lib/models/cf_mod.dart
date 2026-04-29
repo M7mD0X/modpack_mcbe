@@ -1,3 +1,12 @@
+import 'mod.dart';
+
+String _parseReleaseType(int? type) {
+  if (type == 1) return 'release';
+  if (type == 2) return 'beta';
+  if (type == 3) return 'alpha';
+  return 'release';
+}
+
 class CfFile {
   final int id;
   final String displayName;
@@ -29,13 +38,7 @@ class CfFile {
       displayName: json['displayName']?.toString() ?? '',
       fileName: json['fileName']?.toString() ?? '',
       fileSize: json['fileSize'] as int? ?? 0,
-      releaseType: json['releaseType'] as int? == 1
-          ? 'release'
-          : json['releaseType'] as int? == 2
-              ? 'beta'
-              : json['releaseType'] as int? == 3
-                  ? 'alpha'
-                  : 'release',
+      releaseType: _parseReleaseType(json['releaseType'] as int?),
       downloadCount: json['downloadCount'] as int? ?? 0,
       fileDate: json['fileDate'] != null
           ? DateTime.tryParse(json['fileDate'].toString())

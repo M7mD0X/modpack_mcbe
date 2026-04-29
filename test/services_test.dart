@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:modpack_mcbe/models/mod.dart';
 import 'package:modpack_mcbe/models/modpack.dart';
+import 'package:modpack_mcbe/models/api_types.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {

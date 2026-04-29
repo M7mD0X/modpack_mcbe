@@ -29,7 +29,7 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthService>();
+    context.watch<AuthService>();
 
     return MaterialApp(
       title: 'MCBE Modpack Manager',

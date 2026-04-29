@@ -60,7 +60,7 @@ class _AnimatedSplashState extends State<AnimatedSplash>
       backgroundColor: AppTheme.background,
       body: Center(
         child: AnimatedBuilder(
-          animation: _controller,
+          listenable: _controller,
           builder: (context, child) {
             return FadeTransition(
               opacity: _fadeAnimation,

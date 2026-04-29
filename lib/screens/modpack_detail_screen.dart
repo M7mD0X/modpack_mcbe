@@ -6,6 +6,7 @@ import '../services/modpack_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/fade_in_view.dart';
 import '../widgets/mod_card.dart';
+import 'browse_screen.dart';
 import 'mod_detail_screen.dart';
 
 class ModpackDetailScreen extends StatelessWidget {

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../services/modpack_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/fade_in_view.dart';
-import 'modpack_detail_screen.dart';
 
 class ApplyScreen extends StatefulWidget {
   const ApplyScreen({super.key});
@@ -16,6 +15,7 @@ class ApplyScreen extends StatefulWidget {
 class _ApplyScreenState extends State<ApplyScreen>
     with AutomaticKeepAliveClientMixin {
   String _applyingModpackId = '';
+  bool _applySuccess = false;
   @override
   bool get wantKeepAlive => true;
 

@@ -81,7 +81,7 @@ class AppTheme {
         titleTextStyle: textTheme.titleLarge,
         toolbarTextStyle: textTheme.bodyMedium,
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardTheme(
         color: card,
         elevation: 0,
         shape: RoundedRectangleBorder(

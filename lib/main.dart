@@ -20,9 +20,6 @@ void main() async {
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
       statusBarBrightness: Brightness.dark,
-      navigationBarColor: Colors.transparent,
-      navigationBarIconBrightness: Brightness.light,
-      navigationBarDividerColor: Colors.transparent,
     ),
   );
 

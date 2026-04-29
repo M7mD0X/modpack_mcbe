@@ -191,7 +191,7 @@ class _BrowseScreenState extends State<BrowseScreen> with AutomaticKeepAliveClie
     );
   }
 
-  void _onRefresh() {
+  Future<void> _onRefresh() async {
     _loadMods();
   }
 
