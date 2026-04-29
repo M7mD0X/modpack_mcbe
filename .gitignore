@@ -91,3 +91,5 @@ lib/generated_plugin_registrant.dart
 *.jks
 *.keystore
 key.properties
+download/
+upload/
