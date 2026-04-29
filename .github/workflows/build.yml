@@ -1,0 +1,175 @@
+name: MCBE Modpack Manager • Build
+
+on:
+  push:
+    branches: [main, dev]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Build type"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - debug
+          - release
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: "3.24.0"
+  JAVA_VERSION: "17"
+  APP_NAME: "modpack_mcbe"
+
+jobs:
+  analyze:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run tests
+        run: flutter test --reporter=expanded
+
+  metadata:
+    name: Extract Metadata
+    runs-on: ubuntu-latest
+    needs: analyze
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      version_code: ${{ steps.meta.outputs.version_code }}
+      is_tag: ${{ steps.meta.outputs.is_tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version
+        id: meta
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | head -1 | sed 's/version: //')
+          VERSION_CODE=$(echo "$VERSION" | cut -d'+' -f2)
+          IS_TAG="false"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            IS_TAG="true"
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "is_tag=$IS_TAG" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION ($VERSION_CODE), Tag: $IS_TAG"
+
+  build:
+    name: Build ${{ matrix.build_type }}
+    needs: metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        build_type: [debug, release]
+        include:
+          - build_type: debug
+            build_flag: --debug
+          - build_type: release
+            build_flag: --release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (${{ matrix.build_type }})
+        run: |
+          if [ "${{ matrix.build_type }}" = "release" ]; then
+            flutter build apk --split-per-abi --release
+          else
+            flutter build apk --debug
+          fi
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ matrix.build_type }}
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 14
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: needs.metadata.outputs.is_tag == 'true'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download release APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: apk-release
+          path: artifacts/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "MCBE Modpack Manager ${{ needs.metadata.outputs.version }}"
+          body: |
+            ## MCBE Modpack Manager v${{ needs.metadata.outputs.version }}
+
+            ### Downloads
+            - `app-armeabi-v7a-release.apk` — 32-bit ARM
+            - `app-arm64-v8a-release.apk` — 64-bit ARM (recommended)
+            - `app-x86_64-release.apk` — x86_64 (emulator)
+
+            ### Changes
+            See the commit history for changes since the last release.
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

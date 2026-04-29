@@ -1,0 +1,79 @@
+name: MCBE Modpack Manager • Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump type"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: write
+
+jobs:
+  bump-version:
+    name: Bump Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        id: bump
+        run: |
+          CURRENT_VERSION=$(grep 'version:' pubspec.yaml | head -1 | sed 's/version: //' | cut -d'+' -f1)
+          CURRENT_CODE=$(grep 'version:' pubspec.yaml | head -1 | sed 's/version: //' | cut -d'+' -f2)
+
+          IFS='.' read -ra PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${PARTS[0]}
+          MINOR=${PARTS[1]}
+          PATCH=${PARTS[2]}
+
+          case "${{ github.event.inputs.bump }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_CODE=$((CURRENT_CODE + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}+${NEW_CODE}"
+          TAG="v${MAJOR}.${MINOR}.${PATCH}"
+
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "new=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+          # Update pubspec.yaml
+          sed -i "s/^version: .*/version: $NEW_VERSION/" pubspec.yaml
+
+          git add pubspec.yaml
+          git commit -m "chore: bump version to $NEW_VERSION"
+          git push
+
+      - name: Create tag
+        run: |
+          git tag ${{ steps.bump.outputs.tag }}
+          git push origin ${{ steps.bump.outputs.tag }}

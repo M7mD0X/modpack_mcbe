@@ -1,0 +1,94 @@
+name: MCBE Modpack Manager • Nightly
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC daily
+  workflow_dispatch:
+
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "17"
+  APP_NAME: "modpack_mcbe"
+
+jobs:
+  nightly-build:
+    name: Nightly Canary Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Setup Flutter (master)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: master
+          cache: true
+
+      - name: Get Flutter version
+        run: flutter --version
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run analyze
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+
+      - name: Run tests
+        run: flutter test
+        continue-on-error: true
+
+      - name: Build release APK
+        run: flutter build apk --split-per-abi --release
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-apk
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 7
+
+      - name: Create canary tag
+        run: |
+          DATE=$(date +%Y%m%d)
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          CANARY_TAG="nightly-${DATE}-${SHORT_SHA}"
+          echo "canary_tag=$CANARY_TAG" >> $GITHUB_ENV
+
+      - name: Create nightly release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.canary_tag }}
+          name: "🌙 Nightly ${{ env.canary_tag }}"
+          body: |
+            ## 🌙 Nightly Canary Build
+
+            **Flutter**: master channel
+            **Commit**: ${{ github.sha }}
+
+            ### ⚠️ Warning
+            This is an automated nightly build from the master channel.
+            It may contain bugs and breaking changes. Use at your own risk.
+
+            ### Downloads
+            - `app-armeabi-v7a-release.apk` — 32-bit ARM
+            - `app-arm64-v8a-release.apk` — 64-bit ARM
+            - `app-x86_64-release.apk` — x86_64
+          draft: false
+          prerelease: true
+          files: |
+            build/app/outputs/flutter-apk/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
