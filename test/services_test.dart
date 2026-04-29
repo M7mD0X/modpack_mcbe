@@ -22,8 +22,8 @@ void main() {
         name: 'Test Modpack',
         description: 'A test modpack',
         mods: [
-          Mod(id: '1', name: 'Mod 1', author: 'Author', downloads: 100),
-          Mod(id: '2', name: 'Mod 2', author: 'Author', downloads: 200),
+          Mod(id: '1', name: 'Mod 1', author: 'Author', description: 'Desc', downloads: 100),
+          Mod(id: '2', name: 'Mod 2', author: 'Author', description: 'Desc', downloads: 200),
         ],
         createdAt: DateTime(2024, 1, 15),
         updatedAt: DateTime(2024, 1, 15),
@@ -64,8 +64,8 @@ void main() {
   });
 
   group('ApiError', () {
-    test('should format error message', () {
-      final error = ApiError(statusCode: 404, message: 'Not found');
+    test('should format error message when no message', () {
+      final error = ApiError(statusCode: 404);
       expect(error.toString(), 'Error 404');
     });
 

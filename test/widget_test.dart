@@ -52,6 +52,7 @@ void main() {
         id: '789',
         name: 'Original',
         author: 'Author',
+        description: 'Original mod',
         downloads: 100,
       );
 
@@ -63,9 +64,9 @@ void main() {
     });
 
     test('should implement equality by id', () {
-      final mod1 = Mod(id: '1', name: 'Mod A');
-      final mod2 = Mod(id: '1', name: 'Mod B');
-      final mod3 = Mod(id: '2', name: 'Mod A');
+      const mod1 = Mod(id: '1', name: 'Mod A', author: 'Author', description: 'Desc');
+      const mod2 = Mod(id: '1', name: 'Mod B', author: 'Author', description: 'Desc');
+      const mod3 = Mod(id: '2', name: 'Mod A', author: 'Author', description: 'Desc');
 
       expect(mod1, equals(mod2));
       expect(mod1, isNot(equals(mod3)));
@@ -103,8 +104,8 @@ void main() {
         id: 'mp_2',
         name: 'Test',
         mods: [
-          Mod(id: '1', name: 'Mod 1'),
-          Mod(id: '2', name: 'Mod 2'),
+          Mod(id: '1', name: 'Mod 1', author: 'Author', description: 'Desc'),
+          Mod(id: '2', name: 'Mod 2', author: 'Author', description: 'Desc'),
         ],
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
@@ -148,15 +149,15 @@ void main() {
 
   group('CfFile Model', () {
     test('should format file size correctly', () {
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 500, releaseType: 'release', downloadCount: 0).formattedSize, '500 B');
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 2048, releaseType: 'release', downloadCount: 0).formattedSize, '2.0 KB');
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 5242880, releaseType: 'release', downloadCount: 0).formattedSize, '5.0 MB');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 500, releaseType: 'release', downloadCount: 0).formattedSize, '500 B');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 2048, releaseType: 'release', downloadCount: 0).formattedSize, '2.0 KB');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 5242880, releaseType: 'release', downloadCount: 0).formattedSize, '5.0 MB');
     });
 
     test('should format download count correctly', () {
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 500).formattedDownloads, '500');
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 15000).formattedDownloads, '15.0K');
-      expect(CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 2500000).formattedDownloads, '2.5M');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 500).formattedDownloads, '500');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 15000).formattedDownloads, '15.0K');
+      expect(const CfFile(id: 0, displayName: '', fileName: '', fileSize: 0, releaseType: 'release', downloadCount: 2500000).formattedDownloads, '2.5M');
     });
   });
 
